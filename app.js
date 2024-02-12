@@ -1,17 +1,33 @@
 const express = require('express');
 const morgan = require('morgan');
-
+const mongoose = require('mongoose');
+const Blog = require('./models/blog');
 // express app
 const app = express();
 
 // listen for requests
-app.listen(3000);
+const dbURI = 'mongodb+srv://vinceict:Xyience123456911@maincluster.hticwuf.mongodb.net/?retryWrites=true&w=majority';
+mongoose.connect(dbURI)
+  .then((result) => app.listen(3000))
+  .catch((err) => console.log(err));
+
 
 // register view engine
 app.set('view engine', 'ejs');
 
 // middleware & static files
 app.use(express.static('public'));
+app.use(morgan('dev'));
+
+app.get('/add-blog', () => {
+  const blog = new Blog({
+    title: 'new blog',
+    snippet: 'about my new blog',
+    body: 'more about my blog'
+  });
+
+  blog.save();
+});
 
 app.use((req, res, next) => {
   console.log('new request made:');
@@ -26,7 +42,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(morgan('dev'));
+
 
 app.use((req, res, next) => {
   res.locals.path = req.path;
@@ -35,9 +51,9 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   const blogs = [
-    {title: 'Yoshi finds eggs', snippet: 'Lorem ipsum dolor sit amet consectetur'},
-    {title: 'Mario finds stars', snippet: 'Lorem ipsum dolor sit amet consectetur'},
-    {title: 'How to defeat bowser', snippet: 'Lorem ipsum dolor sit amet consectetur'},
+    { title: 'Yoshi finds eggs', snippet: 'Lorem ipsum dolor sit amet consectetur' },
+    { title: 'Mario finds stars', snippet: 'Lorem ipsum dolor sit amet consectetur' },
+    { title: 'How to defeat bowser', snippet: 'Lorem ipsum dolor sit amet consectetur' },
   ];
   res.render('index', { title: 'Home', blogs });
 });
